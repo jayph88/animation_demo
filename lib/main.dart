@@ -35,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage>
   double _size = 0;
   late AnimationController _animationController;
   late Animation _animation;
+  late Animation<Color?> _animation_color;
 
   @override
   void initState() {
@@ -48,6 +49,7 @@ class _MyHomePageState extends State<MyHomePage>
 
       });
     });
+    _animation_color = ColorTween(begin: Colors.red , end: Colors.green ).animate(_animationController);
 
   }
 
@@ -74,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage>
               width: double.infinity,
               alignment: Alignment(_animation.value, -1),
               child: Container(
-                color: Colors.pink,
+                color: _animation_color.value,
                 height: 50,
                 width: 50,
               ),
