@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() => runApp(MainWidget());
@@ -45,11 +47,13 @@ class GoalTrackerWidgetState extends State<GoalTrackerWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  late Animation<double> _rotateAnimation;
   var _currentGoal = 0;
-  var _numGoals;
+  late int _numGoals;
   var _buttonText = 'Next Step!';
   late VoidCallback  _progress;
   var test = 10;
+  final double _degrees = pi / 180.0;
 
   @override
   void initState() {
@@ -57,11 +61,19 @@ class GoalTrackerWidgetState extends State<GoalTrackerWidget>
 
     _animationController =
         AnimationController(duration: Duration(seconds: 2), vsync: this);
+
     _animation = Tween<double>(begin: 0, end: widget.width - 10.0)
-        .animate(_animationController);
-    _animation.addListener(() {
-      setState(() {});
-    });
+        .animate(CurvedAnimation(parent: _animationController, curve: Interval(0,.75)));
+    // _animation.addListener(() {
+    //   setState(() {});
+    // });
+
+    _rotateAnimation = Tween<double>(begin: 0, end: 1440).animate(
+      CurvedAnimation(parent: _animationController, curve: Interval(.75,1))
+    );
+    _rotateAnimation.addListener(() { setState(() {
+
+    });});
 
     _numGoals = widget.numGoals;
     _progress = _nextStep;
@@ -74,7 +86,7 @@ class GoalTrackerWidgetState extends State<GoalTrackerWidget>
   }
 
   void _nextStep() {
-    _currentGoal += 1;
+    _currentGoal += _numGoals;
     _animationController.animateTo(_currentGoal/_numGoals);
     if (_currentGoal >= _numGoals) {
       setState(() {
@@ -108,13 +120,16 @@ class GoalTrackerWidgetState extends State<GoalTrackerWidget>
                 Positioned(
                   left: _animation.value,
                   top: 0.0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      color: Colors.green[600],
+                  child: Transform.rotate(
+                    angle: _rotateAnimation.value * _degrees,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        color: Colors.green[600],
+                      ),
+                      height: 30.0,
+                      width: 10.0,
                     ),
-                    height: 30.0,
-                    width: 10.0,
                   ),
                 ),
               ],
