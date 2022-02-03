@@ -1,56 +1,70 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(MainWidget());
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
+class MainWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: HomeWidget(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
+class HomeWidget extends StatelessWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Check In Progress'),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            GoalTrackerWidget(
+                width: MediaQuery.of(context).size.width - 20.0, numGoals: 10),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class GoalTrackerWidget extends StatefulWidget {
+  final double width;
+  final int numGoals;
+
+  GoalTrackerWidget({Key? key, required this.width, required this.numGoals})
+      : super(key: key);
+
+  @override
+  GoalTrackerWidgetState createState() => GoalTrackerWidgetState();
+}
+
+class GoalTrackerWidgetState extends State<GoalTrackerWidget>
     with SingleTickerProviderStateMixin {
-  double _size = 0;
   late AnimationController _animationController;
-  late Animation _animation;
-  late Animation<Color?> _animation_color;
+  late Animation<double> _animation;
+  var _currentGoal = 0;
+  var _numGoals;
+  var _buttonText = 'Next Step!';
+  late VoidCallback  _progress;
+  var test = 10;
 
   @override
   void initState() {
     super.initState();
+
     _animationController =
-        AnimationController(vsync: this, duration: Duration(seconds:2));
-
-    _animation = Tween<double>(begin: -1, end: 1).chain(CurveTween(curve: Curves.bounceOut)).animate(_animationController);
+        AnimationController(duration: Duration(seconds: 2), vsync: this);
+    _animation = Tween<double>(begin: 0, end: widget.width - 10.0)
+        .animate(_animationController);
     _animation.addListener(() {
-      setState(() {
-
-      });
+      setState(() {});
     });
-    _animation_color = ColorTween(begin: Colors.red , end: Colors.green ).animate(_animationController);
 
+    _numGoals = widget.numGoals;
+    _progress = _nextStep;
   }
 
   @override
@@ -59,67 +73,62 @@ class _MyHomePageState extends State<MyHomePage>
     super.dispose();
   }
 
+  void _nextStep() {
+    _currentGoal += 1;
+    _animationController.animateTo(_currentGoal/_numGoals);
+    if (_currentGoal >= _numGoals) {
+      setState(() {
+        _buttonText = 'All done!';
+        // _progress = null;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    double _xrange = MediaQuery.of(context).size.width - 50;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Column(
-        // crossAxisAlignment: Alignment.,
-        children: [
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.all(10),
-              color: Colors.black12,
-              width: double.infinity,
-              alignment: Alignment(_animation.value, -1),
-              child: Container(
-                color: _animation_color.value,
-                height: 50,
-                width: 50,
-              ),
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Container(
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                SizedBox(
+                  height: 40.0,
+                  width: widget.width,
+                ),
+                Positioned(
+                  top: 10.0,
+                  child: Container(
+                    height: 10.0,
+                    width: widget.width,
+                    color: Colors.black,
+                  ),
+                ),
+                Positioned(
+                  left: _animation.value,
+                  top: 0.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      color: Colors.green[600],
+                    ),
+                    height: 30.0,
+                    width: 10.0,
+                  ),
+                ),
+              ],
             ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                  onPressed: () {
-                    _animationController.forward();
-                  },
-                  child: Text('start')),
-              ElevatedButton(
-                  onPressed: () {
-                    _animationController.stop();
-                  },
-                  child: Text('stop')),
-              ElevatedButton(
-                  onPressed: () {
-                    _animationController.reverse();
-                  },
-                  child: Text('reverse')),
-              ElevatedButton(
-                  onPressed: () {
-                    _animationController.reset();
-                  },
-                  child: Text('reset')),
-            ],
-          )
-        ],
+            Text(_currentGoal < _numGoals
+                ? '$_currentGoal / $_numGoals'
+                : 'Completed!'),
+            ElevatedButton(
+              child: Text(_buttonText),
+              onPressed: _progress,
+            ),
+          ],
+        ),
       ),
-        // body : Stack(
-        //   children: [
-        //     Container(
-        //       height: 100,
-        //       width: 100,
-        //       color: Colors.red,
-        //     )
-        //   ],
-        // )
     );
-
-
   }
 }
