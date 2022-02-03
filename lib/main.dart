@@ -48,6 +48,7 @@ class GoalTrackerWidgetState extends State<GoalTrackerWidget>
   late AnimationController _animationController;
   late Animation<double> _animation;
   late Animation<double> _rotateAnimation;
+  late Animation _fadeanimation;
   var _currentGoal = 0;
   late int _numGoals;
   var _buttonText = 'Next Step!';
@@ -63,7 +64,7 @@ class GoalTrackerWidgetState extends State<GoalTrackerWidget>
         AnimationController(duration: Duration(seconds: 2), vsync: this);
 
     _animation = Tween<double>(begin: 0, end: widget.width - 10.0)
-        .animate(CurvedAnimation(parent: _animationController, curve: Interval(0,.75)));
+        .animate(CurvedAnimation(parent: _animationController, curve: Interval(0,.5)));
     // _animation.addListener(() {
     //   setState(() {});
     // });
@@ -74,6 +75,12 @@ class GoalTrackerWidgetState extends State<GoalTrackerWidget>
     _rotateAnimation.addListener(() { setState(() {
 
     });});
+
+    _fadeanimation = TweenSequence([
+      TweenSequenceItem(tween: Tween<double>(begin:1, end: 0), weight: 1),
+      TweenSequenceItem(tween: Tween<double>(begin:0, end: 1), weight: 1),
+    ]).animate(CurvedAnimation(parent: _animationController, curve: Interval(.5,.75)));
+
 
     _numGoals = widget.numGoals;
     _progress = _nextStep;
@@ -125,7 +132,7 @@ class GoalTrackerWidgetState extends State<GoalTrackerWidget>
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                        color: Colors.green[600],
+                        color: Color.fromRGBO(0,128,0,_fadeanimation.value),
                       ),
                       height: 30.0,
                       width: 10.0,
