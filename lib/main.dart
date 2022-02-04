@@ -1,8 +1,61 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 void main() => runApp(MainWidget());
+
+var activities = [
+  Activity(
+      title: 'Baseball',
+      description: 'Something about baseball.',
+      iconData: Icons.sports_baseball),
+  Activity(
+      title: 'Basketball',
+      description: 'Something about basketball.',
+      iconData: Icons.sports_basketball),
+  Activity(
+      title: 'Cycling',
+      description: 'Something about cycling.',
+      iconData: Icons.pedal_bike),
+  Activity(
+      title: 'Golf',
+      description: 'Something about golf.',
+      iconData: Icons.sports_golf),
+  Activity(
+      title: 'Handball',
+      description: 'Something about handball.',
+      iconData: Icons.sports_handball),
+  Activity(
+      title: 'Rowing',
+      description: 'Something about rowing.',
+      iconData: Icons.rowing),
+  Activity(
+      title: 'Running',
+      description: 'Something about running.',
+      iconData: Icons.directions_run),
+  Activity(
+      title: 'Soccer',
+      description: 'Something about soccer.',
+      iconData: Icons.sports_soccer),
+  Activity(
+      title: 'Tennis',
+      description: 'Something about tennis.',
+      iconData: Icons.sports_tennis),
+  Activity(
+      title: 'Volleyball',
+      description: 'Something about volleyball.',
+      iconData: Icons.sports_volleyball),
+  Activity(
+      title: 'Walking',
+      description: 'Something about walking.',
+      iconData: Icons.directions_walk),
+];
+
+class Activity {
+  String title;
+  String description;
+  IconData iconData;
+
+  Activity({required this.title, required this.description, required this.iconData});
+}
 
 class MainWidget extends StatelessWidget {
   @override
@@ -18,135 +71,132 @@ class HomeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Check In Progress'),
+        title: Text('Carved Rock Fitness'),
+        backgroundColor: Colors.deepPurple[900],
       ),
       body: Center(
-        child: Column(
-          children: [
-            GoalTrackerWidget(
-                width: MediaQuery.of(context).size.width - 20.0, numGoals: 10),
-          ],
+        child: ListView.builder(
+          itemCount: activities.length,
+          itemBuilder: (context, index) {
+            final activity = activities[index];
+            return ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ActivityWidget(),
+                    settings: RouteSettings(
+                      arguments: activity,
+                    ),
+                  ),
+                );
+              },
+              leading: Hero(
+                child: Icon(
+                  activity.iconData,
+                  size: 70.0,
+                  color: Colors.deepPurpleAccent[700],
+                ),
+                tag: activity.title,
+              ),
+              title: Container(
+                alignment: Alignment.bottomCenter,
+                height: 70.0,
+                child: Text(
+                  activities[index].title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25.0,
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class GoalTrackerWidget extends StatefulWidget {
-  final double width;
-  final int numGoals;
-
-  GoalTrackerWidget({Key? key, required this.width, required this.numGoals})
-      : super(key: key);
-
-  @override
-  GoalTrackerWidgetState createState() => GoalTrackerWidgetState();
-}
-
-class GoalTrackerWidgetState extends State<GoalTrackerWidget>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-  late Animation<double> _rotateAnimation;
-  late Animation _fadeanimation;
-  var _currentGoal = 0;
-  late int _numGoals;
-  var _buttonText = 'Next Step!';
-  late VoidCallback  _progress;
-  var test = 10;
-  final double _degrees = pi / 180.0;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _animationController =
-        AnimationController(duration: Duration(seconds: 2), vsync: this);
-
-    _animation = Tween<double>(begin: 0, end: widget.width - 10.0)
-        .animate(CurvedAnimation(parent: _animationController, curve: Interval(0,.5)));
-    // _animation.addListener(() {
-    //   setState(() {});
-    // });
-
-    _rotateAnimation = Tween<double>(begin: 0, end: 1440).animate(
-      CurvedAnimation(parent: _animationController, curve: Interval(.75,1))
-    );
-    _rotateAnimation.addListener(() { setState(() {
-
-    });});
-
-    _fadeanimation = TweenSequence([
-      TweenSequenceItem(tween: Tween<double>(begin:1, end: 0), weight: 1),
-      TweenSequenceItem(tween: Tween<double>(begin:0, end: 1), weight: 1),
-    ]).animate(CurvedAnimation(parent: _animationController, curve: Interval(.5,.75)));
-
-
-    _numGoals = widget.numGoals;
-    _progress = _nextStep;
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _nextStep() {
-    _currentGoal += _numGoals;
-    _animationController.animateTo(_currentGoal/_numGoals);
-    if (_currentGoal >= _numGoals) {
-      setState(() {
-        _buttonText = 'All done!';
-        // _progress = null;
-      });
-    }
-  }
-
+class ActivityWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(10.0),
-      child: Container(
+    final Activity activity = ModalRoute.of(context)!.settings.arguments as Activity;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Activity Detail'),
+        backgroundColor: Colors.deepPurple[900],
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20.0),
         child: Column(
           children: [
-            Stack(
-              children: [
-                SizedBox(
-                  height: 40.0,
-                  width: widget.width,
-                ),
-                Positioned(
-                  top: 10.0,
-                  child: Container(
-                    height: 10.0,
-                    width: widget.width,
-                    color: Colors.black,
-                  ),
-                ),
-                Positioned(
-                  left: _animation.value,
-                  top: 0.0,
-                  child: Transform.rotate(
-                    angle: _rotateAnimation.value * _degrees,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                        color: Color.fromRGBO(0,128,0,_fadeanimation.value),
+            Container(
+              height: 200.0,
+              width: MediaQuery.of(context).size.width - 40.0,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 10.0,
+                    right: 25.0,
+                    child: Hero(
+                      placeholderBuilder: (context, size, child) => Icon(
+                        activity!.iconData,
+                        size: 150,
+                        color: Colors.deepPurple[50],
                       ),
-                      height: 30.0,
-                      width: 10.0,
+                      flightShuttleBuilder: (context, animation, direction,
+                          srcContext, destContext) {
+                        return ScaleTransition(
+                          scale: TweenSequence([
+                            TweenSequenceItem(
+                                tween: Tween<double>(begin: 1.0, end: 10.0),
+                                weight: 1),
+                            TweenSequenceItem(
+                                tween: Tween<double>(begin: 10.0, end: 2.14),
+                                weight: 1),
+                          ]).animate(animation),
+                          child: Icon(
+                            activity.iconData,
+                            size: 70,
+                            color: Colors.deepPurple[200],
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        activity.iconData,
+                        size: 150.0,
+                        color: Colors.deepPurple[200],
+                      ),
+                      tag: activity.title,
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    top: 115.0,
+                    right: 0.0,
+                    child: Text(
+                      activity.title.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 65.0,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -4.0,
+                        color: Colors.deepPurple[700],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Text(_currentGoal < _numGoals
-                ? '$_currentGoal / $_numGoals'
-                : 'Completed!'),
-            ElevatedButton(
-              child: Text(_buttonText),
-              onPressed: _progress,
+            SizedBox(
+              height: 10.0,
+            ),
+            Text(
+              List.filled(10, activity.description).join(' '),
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 19.0,
+                height: 1.4,
+              ),
             ),
           ],
         ),
